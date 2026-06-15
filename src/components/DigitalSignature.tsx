@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
+import React, { useState, useRef, useEffect, MouseEvent, TouchEvent } from 'react';
 import { ESignature } from '../types';
-import { Sparkles, Edit3, Type, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Sparkles, Edit3, Type, RotateCcw, ShieldCheck, Upload } from 'lucide-react';
 
 interface DigitalSignatureProps {
   onSave: (sig: ESignature) => void;
@@ -15,7 +15,7 @@ export default function DigitalSignature({
   defaultPosition,
   actionLabel = "Apply Digital Signature"
 }: DigitalSignatureProps) {
-  const [signType, setSignType] = useState<'draw' | 'type'>('draw');
+  const [signType, setSignType] = useState<'draw' | 'type' | 'import'>('draw');
   const [fullName, setFullName] = useState(defaultName);
   const [position, setPosition] = useState(defaultPosition);
   const [typedFont, setTypedFont] = useState<'serif' | 'cursive' | 'mono'>('cursive');
@@ -23,6 +23,12 @@ export default function DigitalSignature({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawing = useRef(false);
+
+  // Import Signature states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importedImage, setImportedImage] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState('');
 
   // Initialize canvas drawing behavior
   useEffect(() => {
@@ -99,6 +105,52 @@ export default function DigitalSignature({
     }
   };
 
+  // Import File processor
+  const handleFile = (file: File) => {
+    setFileError('');
+    if (!file.type.startsWith('image/')) {
+      setFileError('Unsupported format. Please upload a valid image file (PNG, JPG, JPEG, SVG).');
+      return;
+    }
+    
+    if (file.size > 3 * 1024 * 1024) {
+      setFileError('The file size exceeds 3MB. Please upload a compressed signature clip.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result && typeof e.target.result === 'string') {
+        setImportedImage(e.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
   const handleSave = () => {
     const nowStr = new Date().toLocaleString('en-US', {
       day: '2-digit',
@@ -115,6 +167,8 @@ export default function DigitalSignature({
       if (canvas) {
         sigValue = canvas.toDataURL();
       }
+    } else if (signType === 'import') {
+      sigValue = importedImage;
     } else {
       sigValue = fullName;
     }
@@ -133,16 +187,16 @@ export default function DigitalSignature({
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-inner mt-4">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-emerald-500 animate-pulse" />
           <h4 className="font-semibold text-sm text-slate-100 uppercase tracking-wider">Secured Approval Signature</h4>
         </div>
-        <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800">
+        <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 self-start sm:self-auto overflow-x-auto max-w-full">
           <button
             type="button"
             onClick={() => setSignType('draw')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
               signType === 'draw'
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
@@ -154,7 +208,7 @@ export default function DigitalSignature({
           <button
             type="button"
             onClick={() => setSignType('type')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
               signType === 'type'
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
@@ -162,6 +216,18 @@ export default function DigitalSignature({
           >
             <Type className="w-3.5 h-3.5" />
             Type Keyboard
+          </button>
+          <button
+            type="button"
+            onClick={() => setSignType('import')}
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+              signType === 'import'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Import from Device
           </button>
         </div>
       </div>
@@ -189,8 +255,8 @@ export default function DigitalSignature({
         </div>
       </div>
 
-      {signType === 'draw' ? (
-        <div className="relative">
+      {signType === 'draw' && (
+        <div className="relative animate-fadeIn">
           <div className="bg-slate-950 border border-slate-850 rounded-lg overflow-hidden relative">
             <canvas
               ref={canvasRef}
@@ -216,12 +282,14 @@ export default function DigitalSignature({
               Clear
             </button>
           </div>
-          <p className="text-[10px] text-slate-500 mt-1.5 italic text-center">
+          <p className="text-[10px] text-slate-500 mt-1.5 italic text-center text-slate-400">
             Draw your signature directly using touch or cursor drag.
           </p>
         </div>
-      ) : (
-        <div>
+      )}
+
+      {signType === 'type' && (
+        <div className="animate-fadeIn">
           <div className="bg-slate-950 border border-slate-850 rounded-lg min-h-[140px] flex items-center justify-center relative p-4">
             <div className="absolute top-2 left-2 flex gap-1.5">
               <button
@@ -256,7 +324,7 @@ export default function DigitalSignature({
             <div
               className={`text-3xl text-emerald-400 select-none text-center ${
                 typedFont === 'cursive'
-                  ? 'font-serif italic tracking-widest'
+                  ? 'font-serif italic tracking-widest font-thin'
                   : typedFont === 'serif'
                   ? 'font-serif underline tracking-tight'
                   : 'font-mono'
@@ -265,8 +333,71 @@ export default function DigitalSignature({
               {fullName || "Your Signature Preview"}
             </div>
           </div>
-          <p className="text-[10px] text-slate-500 mt-1.5 italic text-center">
+          <p className="text-[10px] text-slate-500 mt-1.5 italic text-center text-slate-400">
             System will securely synthesize a digital typographic vector representation model.
+          </p>
+        </div>
+      )}
+
+      {signType === 'import' && (
+        <div className="space-y-3 animate-fadeIn">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+            id="signature-file-upload"
+          />
+          {importedImage ? (
+            <div className="bg-slate-950 border border-slate-850 rounded-lg min-h-[140px] flex flex-col items-center justify-center p-4 relative">
+              <img
+                src={importedImage}
+                alt="Uploaded Signature Preview"
+                className="max-h-[110px] object-contain max-w-full rounded border border-slate-800 p-2 bg-slate-900/40 brightness-110"
+                referrerPolicy="no-referrer"
+              />
+              <button
+                type="button"
+                onClick={() => setImportedImage('')}
+                className="absolute bottom-2.5 right-2.5 bg-slate-900 border border-slate-800 text-rose-400 hover:text-rose-350 p-1.5 rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Change File
+              </button>
+            </div>
+          ) : (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-lg p-6 min-h-[140px] flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-all ${
+                isDragging
+                  ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400'
+                  : 'border-slate-800 bg-slate-950 hover:border-slate-700 hover:bg-[#111A2E]/40 text-slate-400'
+              }`}
+            >
+              <Upload className="w-7 h-7 text-slate-500 animate-bounce" />
+              <div className="text-center">
+                <span className="text-xs font-semibold block text-slate-300">
+                  Drag &amp; drop signature file here, or <span className="text-emerald-400 hover:underline">browse files</span>
+                </span>
+                <span className="text-[10px] text-slate-500 block mt-1 leading-normal">
+                  Supports transparent PNG, JPEG, SVG clips (Max 3MB)
+                </span>
+              </div>
+            </div>
+          )}
+
+          {fileError && (
+            <p className="text-[11px] text-rose-450 leading-tight block text-center font-semibold">
+              ⚠️ {fileError}
+            </p>
+          )}
+
+          <p className="text-[10px] text-slate-500 mt-1.5 italic text-center text-slate-400">
+            Upload a high-contrast crop of your e-signature directly from your local computer or phone.
           </p>
         </div>
       )}
@@ -275,8 +406,8 @@ export default function DigitalSignature({
         <button
           type="button"
           onClick={handleSave}
-          disabled={!fullName || !position}
-          className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-lg text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer"
+          disabled={!fullName || !position || (signType === 'import' && !importedImage)}
+          className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-55 disabled:cursor-not-allowed text-white shadow-lg text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer"
           id="cmd-save-signature"
         >
           <Sparkles className="w-4 h-4" />

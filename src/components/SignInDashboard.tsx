@@ -138,17 +138,15 @@ export default function SignInDashboard({ onSignIn, pendingCounts, theme, onThem
         theme === 'dark' ? 'bg-[#131B2E] border-slate-800' : 'bg-white border-slate-200'
       }`}>
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg overflow-hidden shadow-sm bg-white flex items-center justify-center border border-slate-250 p-1 shrink-0">
-            <img src="https://imgur.com/12nOK79.png" alt="Vetiva Logo" referrerPolicy="no-referrer" className="h-full w-full object-contain" />
-          </div>
+          <img src="https://imgur.com/12nOK79.png" alt="Vetiva Logo" referrerPolicy="no-referrer" className="h-8 w-auto object-contain shrink-0" />
           <div>
             <span className={`text-[11px] font-bold tracking-widest uppercase block ${
               theme === 'dark' ? 'text-slate-200' : 'text-slate-900'
             }`}>
-              Vetiva Capital Management Group
+              Vetiva Capital Management
             </span>
             <span className="text-[9px] text-blue-600 font-mono tracking-widest uppercase font-semibold block">
-              Treasury Secure Sign-In Portal
+              Internal Memo Portal
             </span>
           </div>
         </div>
@@ -483,7 +481,7 @@ export default function SignInDashboard({ onSignIn, pendingCounts, theme, onThem
 
       {/* Corporate Compliance footer */}
       <footer className="py-4 text-center text-[9px] text-slate-500 font-mono select-none">
-        Vetiva Capital Management Group Security Policy • Protected by Cryptographic Dual-Key Dual-Role Multi-Signature (SHA-256) Protocol.
+        Vetiva Capital Management Security Policy • Protected by Cryptographic Dual-Key Dual-Role Multi-Signature (SHA-256) Protocol.
       </footer>
     </div>
   );

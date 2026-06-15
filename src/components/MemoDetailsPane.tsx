@@ -414,7 +414,7 @@ Status: Certified Closed Ledger.
                         <span className="text-[8px] text-slate-600 block leading-normal">{memo.signatures.Initiator.timestamp}</span>
                       </div>
                       <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Initiator.type === 'draw' ? (
+                        {memo.signatures.Initiator.type === 'draw' || memo.signatures.Initiator.type === 'import' ? (
                           <img src={memo.signatures.Initiator.value} alt="Signature Vector representation value" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
                         ) : (
                           <span className="font-serif italic text-emerald-400 text-xs">{memo.signatures.Initiator.value}</span>
@@ -449,7 +449,7 @@ Status: Certified Closed Ledger.
                         <span className="text-[8px] text-slate-600 block">{memo.signatures.LineManager.timestamp}</span>
                       </div>
                       <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1 font-serif text-sky-400 italic">
-                        {memo.signatures.LineManager.type === 'draw' ? (
+                        {memo.signatures.LineManager.type === 'draw' || memo.signatures.LineManager.type === 'import' ? (
                           <img src={memo.signatures.LineManager.value} alt="Line Manager signature image representation" className="h-full object-contain filter invert-0" referrerPolicy="no-referrer" />
                         ) : (
                           <span>{memo.signatures.LineManager.value}</span>
@@ -488,7 +488,7 @@ Status: Certified Closed Ledger.
                         <span className="text-[8px] text-slate-600 block">{memo.signatures.Auditor.timestamp}</span>
                       </div>
                       <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Auditor.type === 'draw' ? (
+                        {memo.signatures.Auditor.type === 'draw' || memo.signatures.Auditor.type === 'import' ? (
                           <img src={memo.signatures.Auditor.value} alt="Auditor digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
                         ) : (
                           <span className="font-serif italic text-purple-400 text-xs">{memo.signatures.Auditor.value}</span>
@@ -527,7 +527,11 @@ Status: Certified Closed Ledger.
                         <span className="text-[8px] text-slate-600 block">{memo.signatures.Executive.timestamp}</span>
                       </div>
                       <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        <span className="font-serif italic text-amber-400 text-xs font-semibold">{memo.signatures.Executive.value}</span>
+                        {memo.signatures.Executive.type === 'draw' || memo.signatures.Executive.type === 'import' ? (
+                          <img src={memo.signatures.Executive.value} alt="Executive CEO digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-amber-400 text-xs font-semibold">{memo.signatures.Executive.value}</span>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -562,7 +566,11 @@ Status: Certified Closed Ledger.
                         <span className="text-[8px] text-slate-600 block">{memo.signatures.Finance.timestamp}</span>
                       </div>
                       <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        <span className="font-serif italic text-rose-400 text-xs font-bold">{memo.signatures.Finance.value}</span>
+                        {memo.signatures.Finance.type === 'draw' || memo.signatures.Finance.type === 'import' ? (
+                          <img src={memo.signatures.Finance.value} alt="Finance digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-rose-400 text-xs font-bold">{memo.signatures.Finance.value}</span>
+                        )}
                       </div>
                     </div>
                   ) : (

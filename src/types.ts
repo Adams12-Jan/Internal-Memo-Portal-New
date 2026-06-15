@@ -25,8 +25,8 @@ export interface ESignature {
   name: string;
   position: string;
   timestamp: string;
-  type: 'draw' | 'type';
-  value: string; // PNG Base64 for draw, Typed text for type
+  type: 'draw' | 'type' | 'import';
+  value: string; // PNG Base64 for draw, Typed text for type, Image data/Base64 for import
 }
 
 export interface Comment {

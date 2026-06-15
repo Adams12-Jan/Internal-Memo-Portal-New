@@ -523,14 +523,12 @@ export default function App() {
       }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl overflow-hidden shadow-sm bg-white flex items-center justify-center border border-slate-250 p-1 shrink-0">
-              <img src="https://imgur.com/12nOK79.png" alt="Vetiva Logo" referrerPolicy="no-referrer" className="h-full w-full object-contain" />
-            </div>
+            <img src="https://imgur.com/12nOK79.png" alt="Vetiva Logo" referrerPolicy="no-referrer" className="h-9 w-auto object-contain shrink-0" />
             <div>
               <h1 className={`text-sm font-black tracking-widest uppercase transition-colors duration-200 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-900'
               }`}>
-                Vetiva Capital Management Limited
+                Vetiva Capital Management
               </h1>
               <span className={`text-[10px] font-mono tracking-widest uppercase font-semibold ${
                 theme === 'dark' ? 'text-blue-400' : 'text-blue-600'

@@ -1,5 +1,5 @@
 {
-  "name": "Vetiva Memo & Cash Management",
+  "name": "Internal Memo",
   "description": "Internal Memo Approval and Cash Management System for Vetiva Capital Management, simplifying Cash Advance, Petty Cash, and Retirement workflows.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
