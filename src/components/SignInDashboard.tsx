@@ -421,14 +421,18 @@ export default function SignInDashboard({ onSignIn, pendingCounts, theme, onThem
 
             <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
               {[
-                { name: 'A. Olanrewaju', email: 'a.olanrewaju@vetiva.com', role: 'Initiator', icon: '👤' },
-                { name: 'Manager Lawson', email: 'b.lawson@vetiva.com', role: 'Line Manager', icon: '💼' },
+                { name: 'A. Olanrewaju', email: 'a.olanrewaju@vetiva.com', role: 'Admin Initiator', icon: '👤' },
+                { name: 'Manager Lawson', email: 'b.lawson@vetiva.com', role: 'Head of Admin', icon: '💼' },
                 { name: 'C. Nze (Auditor)', email: 'c.nze@vetiva.com', role: 'Auditor', icon: '🔍' },
                 { name: 'Dr. O. Vetiva', email: 'o.vetiva@vetiva.com', role: 'Executive', icon: '⚖️' },
                 { name: 'Aisha Suleman', email: 'a.suleiman@vetiva.com', role: 'Finance', icon: '💵' },
                 { name: 'System Admin', email: 'admin@vetiva.com', role: 'Admin', icon: '⚙️' },
               ].map((co) => {
-                const count = pendingCounts[co.role === 'Line Manager' ? 'LineManager' : co.role as Role] || 0;
+                const count = pendingCounts[
+                  co.role === 'Head of Admin' ? 'LineManager' : 
+                  co.role === 'Admin Initiator' ? 'Initiator' : 
+                  co.role as Role
+                ] || 0;
                 return (
                   <button
                     key={co.email}

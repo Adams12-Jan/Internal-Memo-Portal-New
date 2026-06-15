@@ -13,16 +13,16 @@ export const ROLE_PROFILES: RoleProfile[] = [
   {
     id: 'Initiator',
     name: 'Adeleke Olanrewaju / Friday Ezekiel',
-    title: 'Employee / Initiator',
+    title: 'Admin Department Initiator',
     avatarBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-    description: 'Create cash advances, petty cash request, submit petty cash retirements, respond to queries, and view status.'
+    description: 'Admin team member: Create cash advances, petty cash requests, submit petty cash retirements, respond to queries, and track payments.'
   },
   {
     id: 'LineManager',
     name: 'Babatunde Lawson',
-    title: 'Line Manager',
+    title: 'Head of Admin',
     avatarBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    description: 'Review departmental memos, certify business justification, authorize or return for correction, sign digitally.'
+    description: 'Review departmental memos, certify business justification, authorize or return/query requests, sign digitally.'
   },
   {
     id: 'Auditor',
@@ -143,7 +143,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange, pendingCounts,
                   <span className={`${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
                     {getIcon(profile.id)}
                   </span>
-                  <span>{profile.id === 'Initiator' ? 'Initiator' : profile.id === 'LineManager' ? 'Line Manager' : profile.id === 'Auditor' ? 'Auditor' : profile.id === 'Executive' ? 'Executive' : profile.id === 'Finance' ? 'Finance' : 'Admin'}</span>
+                  <span>{profile.id === 'Initiator' ? 'Initiator' : profile.id === 'LineManager' ? 'Head of Admin' : profile.id === 'Auditor' ? 'Auditor' : profile.id === 'Executive' ? 'Executive' : profile.id === 'Finance' ? 'Finance' : 'Admin'}</span>
                   
                   {hasAlert && (
                     <span className="relative flex h-2 w-2">

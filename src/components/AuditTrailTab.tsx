@@ -82,8 +82,8 @@ export default function AuditTrailTab({ logs, onClear, theme = 'light' }: AuditT
             }`}
           >
             <option value="ALL">All Roles Status</option>
-            <option value="Initiator">Initiator (Employee)</option>
-            <option value="LineManager">Line Manager</option>
+            <option value="Initiator">Initiator (Admin Department)</option>
+            <option value="LineManager">Head of Admin</option>
             <option value="Auditor">Internal Control</option>
             <option value="Executive">Executive Office</option>
             <option value="Finance">Finance Department</option>
@@ -195,7 +195,7 @@ export default function AuditTrailTab({ logs, onClear, theme = 'light' }: AuditT
                         log.role === 'Executive' ? 'bg-amber-50/10 text-amber-400 border-amber-500/20' :
                         theme === 'dark' ? 'bg-slate-800/55 text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-605 border-slate-150'
                       }`}>
-                        {log.role}
+                        {log.role === 'LineManager' ? 'Head of Admin' : log.role === 'Initiator' ? 'Admin Initiator' : log.role}
                       </span>
                     </td>
                     <td className="py-3 px-4">

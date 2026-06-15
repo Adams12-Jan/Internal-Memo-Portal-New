@@ -24,6 +24,7 @@ interface MemoFormProps {
     retirementExpenses?: ExpenseLine[];
     balanceReturned?: number;
     initiatorSignature: ESignature;
+    paperMemoOpt?: boolean;
   }) => void;
   onCancel: () => void;
   paidAdvances: { id: string; title: string; amount: number; type: string }[];
@@ -61,6 +62,7 @@ export default function MemoForm({ onSubmit, onCancel, paidAdvances }: MemoFormP
 
   // Signature
   const [signature, setSignature] = useState<ESignature | null>(null);
+  const [paperMemoOpt, setPaperMemoOpt] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
   // Pre-seed some default fields when switching types
@@ -206,7 +208,8 @@ export default function MemoForm({ onSubmit, onCancel, paidAdvances }: MemoFormP
       originalMemoId: memoType === 'Retirement' ? selectedAdvanceId : undefined,
       retirementExpenses: memoType === 'Retirement' ? expenses : undefined,
       balanceReturned: memoType === 'Retirement' ? balanceReturned : undefined,
-      initiatorSignature: signature!
+      initiatorSignature: signature!,
+      paperMemoOpt: paperMemoOpt
     });
   };
 
@@ -235,7 +238,7 @@ export default function MemoForm({ onSubmit, onCancel, paidAdvances }: MemoFormP
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-550 mb-2">Request Type</label>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             {(['CashAdvance', 'PettyCash', 'VendorPayment', 'Retirement'] as MemoType[]).map((type) => {
-              const label = type === 'CashAdvance' ? 'Cash Advance' : type === 'PettyCash' ? 'Petty Cash' : type === 'VendorPayment' ? 'Vendor Payment' : 'Petty Cash Retirement';
+              const label = type === 'CashAdvance' ? 'Cash Advance' : type === 'PettyCash' ? 'Petty Cash' : type === 'VendorPayment' ? 'Payment Tracker' : 'Petty Cash Retirement';
               return (
                 <button
                   key={type}
@@ -441,16 +444,16 @@ export default function MemoForm({ onSubmit, onCancel, paidAdvances }: MemoFormP
             {memoType === 'VendorPayment' && (
               <div className="bg-[#FAF9F6] border border-slate-200 rounded-xl p-4 space-y-3">
                 <span className="text-xs text-blue-600 font-semibold uppercase tracking-wider block border-b border-slate-200 pb-1.5">
-                  Vendor Remittance Information
+                  Payment Tracker Recipient Remittance Details
                 </span>
                 <div>
-                  <label className="block text-[11px] text-slate-604 font-medium mb-0.5">Corporate Vendor Legal Name</label>
+                  <label className="block text-[11px] text-slate-604 font-medium mb-0.5">Corporate Payee / Vendor Legal Name</label>
                   <input
                     type="text"
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none"
-                    placeholder="oracle Nigeria Consultations Ltd"
+                    placeholder="e.g. Oracle Nigeria Consultations Ltd"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -620,15 +623,34 @@ export default function MemoForm({ onSubmit, onCancel, paidAdvances }: MemoFormP
           )}
         </div>
 
+        {/* Automated Paper Memo with E-Signature Option */}
+        <div className="bg-[#FAF9F6] border border-amber-200/60 rounded-xl p-4 flex gap-3 items-start shadow-2xs">
+          <input
+            type="checkbox"
+            id="paperMemoOpt"
+            checked={paperMemoOpt}
+            onChange={(e) => setPaperMemoOpt(e.target.checked)}
+            className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 shrink-0 cursor-pointer mt-0.5"
+          />
+          <div>
+            <label htmlFor="paperMemoOpt" className="block text-xs font-bold text-amber-900 cursor-pointer uppercase tracking-wider flex items-center gap-1.5 leading-none">
+              📄 Generate Automated Paper Memo with E-Signatures
+            </label>
+            <p className="text-[11px] text-slate-650 leading-normal mt-1">
+              If enabled, this request generates an interactive, high-fidelity corporate paper memorandum. When successive approving officers sign in & approve, their validated electronic cursive signatures, official designation stamp, and secure digital checksum will be printed onto the paper ledger.
+            </p>
+          </div>
+        </div>
+
         {/* Dynamic Digital Signature capture panel */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Signature Mandate</label>
           <p className="text-[11px] text-slate-505 mb-3 leading-relaxed">
-            As request initiator, applying your signature constitutes authentication of funding purpose compliance.
+            As request initiator representing the Admin Department, applying your signature constitutes authentication of funding purpose compliance.
           </p>
           <DigitalSignature
             defaultName="Kolawole Davies"
-            defaultPosition="Principal Advisor Management"
+            defaultPosition="Admin Department Officer"
             onSave={(sig) => setSignature(sig)}
             actionLabel="Apply Initiator Signature"
           />

@@ -105,6 +105,7 @@ export default function App() {
   const handleCreateMemo = (newMemoData: any) => {
     const nextIdNumber = memos.length + 13; // ensure unique increment indexing
     const formattedId = `VET/MEMO/2026/${nextIdNumber}`;
+    const targetStatus = newMemoData.type === 'Retirement' ? 'RetirementSubmitted' : 'PendingLineManager';
     
     const newMemo: MemoRequest = {
       id: formattedId,
@@ -119,7 +120,7 @@ export default function App() {
       expectedRetirementDate: newMemoData.expectedRetirementDate,
       priority: newMemoData.priority,
       attachments: newMemoData.attachments,
-      status: 'PendingLineManager', // Default workflow status
+      status: targetStatus, // Default sequential flow status
       createdAt: new Date().toISOString(),
       initiator: {
         name: newMemoData.initiatorSignature.name,
@@ -129,7 +130,7 @@ export default function App() {
         {
           id: `comment-${Date.now()}`,
           userName: newMemoData.initiatorSignature.name,
-          userRole: 'Initiator',
+          userRole: 'Initiator' as any,
           message: `Memo initiated. Secured digital signature applied by ${newMemoData.initiatorSignature.name}.`,
           timestamp: new Date().toISOString()
         }
@@ -137,7 +138,8 @@ export default function App() {
       queries: [],
       signatures: {
         Initiator: newMemoData.initiatorSignature
-      }
+      },
+      paperMemoOpt: newMemoData.paperMemoOpt !== false
     };
 
     // Append to lists
@@ -156,13 +158,14 @@ export default function App() {
     };
     setAuditLogs([newLog, ...auditLogs]);
 
-    pushNotification(`New ${newMemoData.type} "${newMemoData.title}" submitted to Line Manager for approval.`, 'info');
+    const nextRoleUser = newMemoData.type === 'Retirement' ? 'Babatunde Lawson (Head of Admin)' : 'Babatunde Lawson (Head of Admin)';
+    pushNotification(`New ${newMemoData.type === 'VendorPayment' ? 'Payment Tracker' : newMemoData.type} "${newMemoData.title}" submitted. Alert sent to next stage of approval: ${nextRoleUser} has been notified.`, 'urgent');
     setShowCreateForm(false);
   };
 
   // Decisions trigger (Details Pane actions callback)
   const handleDetailsPaneAction = (
-    action: 'Approve' | 'Reject' | 'Query' | 'Return' | 'AnswerQuery', 
+    action: 'Approve' | 'Reject' | 'Query' | 'Return' | 'AnswerQuery' | 'AutomateApprovals', 
     comment: string, 
     sig?: ESignature, 
     queryText?: string,
@@ -233,7 +236,16 @@ export default function App() {
         };
         setAuditLogs([newLog, ...auditLogs]);
 
-        pushNotification(`Memo ${memo.id} approved by ${currentRole} and transitioned to ${updatedStatus}.`, 'success');
+        // Push automatic next-stage alert notification!
+        const nextPerson = 
+          updatedStatus === 'PendingAuditor' ? 'Chioma Nze (Internal Control Auditor)' :
+          updatedStatus === 'PendingExecutive' ? 'Dr. Olaoluwa Vetiva (MD/CEO)' :
+          updatedStatus === 'PendingFinance' ? 'Aisha Suleiman (Finance Department)' :
+          updatedStatus === 'PendingRetirementAuditor' ? 'Chioma Nze (Internal Control Auditor - Retirement)' :
+          updatedStatus === 'PendingRetirementFinance' ? 'Aisha Suleiman (Finance Department - Retirement)' :
+          'Kolawole Davies (Initiator - Payment Processing Complete)';
+
+        pushNotification(`⚡ Next Stage Automatedly Alerted: Memo ${memo.id} approved by ${opName} (${opTitle}). docket forwarded to ${nextPerson} for action.`, 'urgent');
       }
 
       else if (action === 'Reject') {
@@ -649,7 +661,7 @@ export default function App() {
           <div className="flex gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-sm">
             {[
               { id: 'memos', label: 'Memos Dashboard' },
-              { id: 'payment-tracker', label: 'Treasury Settlement' },
+              { id: 'payment-tracker', label: 'Payment Tracker' },
               { id: 'audit', label: 'Compliance Audit Trail' },
               { id: 'reports', label: 'Performance Analytics' }
             ].map((tab) => (
@@ -686,7 +698,37 @@ export default function App() {
 
         {/* VIEW 1: MEMO DASHBOARD LISTINGS */}
         {activeTab === 'memos' && !showCreateForm && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <div className="space-y-4 w-full">
+            
+            {/* Dynamic Portal Pending-Action Alert */}
+            {pendingCounts[currentRole] > 0 && (
+              <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/50 border border-blue-200/70 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm select-none">
+                <div className="flex gap-3 items-start sm:items-center">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 animate-pulse shrink-0 text-sm">
+                    🔔
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider leading-none flex items-center gap-1.5">
+                      <span>Live Queue Notification Desk</span>
+                      <span className="bg-blue-100 text-blue-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase font-mono">
+                        {currentRole === 'LineManager' ? 'Head of Admin' : currentRole === 'Finance' ? 'Finance Controller' : currentRole === 'Auditor' ? 'Internal Auditor' : currentRole === 'Executive' ? 'MD/CEO' : currentRole} Workspace
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-blue-700 leading-normal mt-1.5">
+                      You have <strong>{pendingCounts[currentRole]} priority document(s)</strong> awaiting your compliance review and digital signature. Under administrative guidelines, approving of this docket automatically dispatches alerting protocols and delivers the ledger and attached vouchers directly to the next approving officer.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMemoSubTab('PENDING_ME')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-lg text-[10px] uppercase tracking-widest transition-all cursor-pointer shadow hover:shadow-md shrink-0 self-start sm:self-center"
+                >
+                  Inspect My Inbox
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             
             {/* Table Listings column */}
             <div className={`lg:col-span-8 flex flex-col space-y-4 ${selectedMemoId ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
@@ -747,7 +789,7 @@ export default function App() {
                     <option value="ALL">All Vouchers</option>
                     <option value="CashAdvance">Cash Advance</option>
                     <option value="PettyCash">Petty Cash</option>
-                    <option value="VendorPayment">Vendor Payment</option>
+                    <option value="VendorPayment">Payment Tracker</option>
                     <option value="Retirement">Petty Cash Retirement</option>
                   </select>
                 </div>
@@ -801,7 +843,7 @@ export default function App() {
                               <td className="py-3.5 px-4 max-w-sm">
                                 <span className="text-slate-900 font-semibold text-sm block truncate">{memo.title}</span>
                                 <span className="text-[11px] text-slate-500 font-sans block mt-0.5 lowercase font-normal">
-                                  by <strong className="text-slate-750">{memo.beneficiary}</strong> • {memo.type === 'CashAdvance' ? 'Cash Advance' : memo.type === 'PettyCash' ? 'Petty Cash' : memo.type === 'VendorPayment' ? 'Vendor Pay' : 'Petty Cash Retirement'}
+                                  by <strong className="text-slate-750">{memo.beneficiary}</strong> • {memo.type === 'CashAdvance' ? 'Cash Advance' : memo.type === 'PettyCash' ? 'Petty Cash' : memo.type === 'VendorPayment' ? 'Payment Tracker' : 'Petty Cash Retirement'}
                                 </span>
                               </td>
                               <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900 text-sm">
@@ -848,6 +890,7 @@ export default function App() {
               </div>
             )}
 
+          </div>
           </div>
         )}
 

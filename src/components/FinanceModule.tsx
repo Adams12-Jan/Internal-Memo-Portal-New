@@ -121,7 +121,7 @@ export default function FinanceModule({ pendingFinanceRequests, onDisburse }: Fi
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-mono text-blue-600 font-bold">{memo.id}</span>
                       <span className="text-[10px] text-slate-500 font-mono">
-                        {memo.type === 'CashAdvance' ? 'Cash Advance' : memo.type === 'PettyCash' ? 'Petty Cash' : 'Vendor Payment'}
+                        {memo.type === 'CashAdvance' ? 'Cash Advance' : memo.type === 'PettyCash' ? 'Petty Cash' : 'Payment Tracker'}
                       </span>
                     </div>
                     <strong className="text-slate-800 block truncate font-semibold mb-1">{memo.title}</strong>

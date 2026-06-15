@@ -121,6 +121,7 @@ export interface MemoRequest {
   paymentMethod?: string;
   paymentProofName?: string;
   cashCustodian?: string;
+  paperMemoOpt?: boolean;
 }
 
 export interface Notification {

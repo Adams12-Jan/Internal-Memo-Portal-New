@@ -20,7 +20,7 @@ interface MemoDetailsPaneProps {
 }
 
 export default function MemoDetailsPane({ memo, currentRole, onAction, onClose }: MemoDetailsPaneProps) {
-  const [activeTab, setActiveTab] = useState<'info' | 'timeline' | 'comments' | 'queries'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'papermemo' | 'comments' | 'queries'>('info');
   const [actionComment, setActionComment] = useState('');
   const [showApprovalSection, setShowApprovalSection] = useState(false);
   const [activeApprovalType, setActiveApprovalType] = useState<'Approve' | 'Reject' | 'Query' | 'Return' | null>(null);
@@ -65,7 +65,7 @@ export default function MemoDetailsPane({ memo, currentRole, onAction, onClose }
       case 'Draft':
         return <span className={defaultClasses + "bg-slate-100 border-slate-200 text-slate-600"}>Draft</span>;
       case 'PendingLineManager':
-        return <span className={defaultClasses + "bg-blue-50 border-blue-200 text-blue-700 font-semibold"}>Pending Line Mgr</span>;
+        return <span className={defaultClasses + "bg-blue-50 border-blue-200 text-blue-700 font-semibold"}>Pending Head of Admin</span>;
       case 'PendingAuditor':
         return <span className={defaultClasses + "bg-indigo-50 border-indigo-200 text-indigo-700 font-bold"}>Pending Auditor Review</span>;
       case 'PendingExecutive':
@@ -243,7 +243,7 @@ Status: Certified Closed Ledger.
       <div className="flex bg-[#FAF9F6] border-b border-slate-200 px-4">
         {[
           { id: 'info', label: 'Overview', icon: <FileText className="w-3.5 h-3.5" /> },
-          { id: 'timeline', label: 'Approval Stepper', icon: <History className="w-3.5 h-3.5" /> },
+          { id: 'papermemo', label: 'Paper Memorandum', icon: <Printer className="w-3.5 h-3.5" /> },
           { id: 'comments', label: 'Discussion Logs', icon: <MessageSquare className="w-3.5 h-3.5" /> },
           { id: 'queries', label: 'Policy Queries', icon: <HelpCircle className="w-3.5 h-3.5" /> }
         ].map((tab) => (
@@ -385,224 +385,228 @@ Status: Certified Closed Ledger.
               </div>
             )}
           </div>
-        )}
-
-        {/* TAB 2: APPROVAL STEPPER TIMELINE */}
-        {activeTab === 'timeline' && (
-          <div className="space-y-5">
-            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-3">Workflow Lifecycle Stepper (MS Approvals Style)</h4>
+                {/* TAB 2: OFFICIAL PAPER MEMORANDUM (WITH E-SIGNATURES DYNAMICALLY PRINT DECORATED) */}
+        {activeTab === 'papermemo' && (
+          <div className="space-y-4">
             
-            <div className="space-y-6 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[1.5px] before:bg-slate-800">
+            {/* Download/Print floating control pane */}
+            <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 shadow-3xs">
+              <span className="flex items-center gap-1.5 leading-normal">
+                <span>📄</span>
+                <span><strong>Institutional Parchment Ledger:</strong> Real visual electronic cursive stamps are live-stamped directly below as successive portals endorse the approved status.</span>
+              </span>
+              <button
+                onClick={handleExportPDF}
+                disabled={isExporting}
+                className="bg-amber-100 hover:bg-amber-200 text-amber-950 font-black px-3.5 py-1.5 rounded-lg text-[10px] uppercase tracking-widest flex items-center gap-1 cursor-pointer select-none transition-all shadow-3xs shrink-0 self-start sm:self-center"
+              >
+                {isExporting ? "Processing..." : "Raw Print Format"}
+              </button>
+            </div>
+
+            {/* HIGH FIDELITY PAPER LAYOUT COMPREHENSIVE SHEET */}
+            <div className="bg-[#FAF9F5] border-2 border-slate-300 rounded-2xl p-6 md:p-8 select-all shadow-md text-slate-800 font-sans relative overflow-hidden">
               
-              {/* Step 1: Initiator Submission */}
-              <div className="flex gap-4 relative">
-                <div className="z-10 h-9 w-9 bg-emerald-950/80 border border-emerald-500 text-emerald-400 flex items-center justify-center rounded-full shrink-0 font-bold text-sm">
-                  ✓
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex-1 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="text-slate-200 text-sm">Memo Submitted</strong>
-                    <span className="text-[10px] text-slate-500 font-mono">{new Date(memo.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <p className="text-slate-400 leading-relaxed">Initiated by {memo.initiator.name}. Digital signature applied.</p>
-                  
-                  {memo.signatures.Initiator && (
-                    <div className="mt-3 bg-slate-900 p-2.5 rounded border border-slate-800 flex items-center justify-between gap-2 max-w-sm">
-                      <div className="flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{memo.signatures.Initiator.name}</span>
-                        <span className="text-[9px] text-slate-500 block leading-none">{memo.signatures.Initiator.position}</span>
-                        <span className="text-[8px] text-slate-600 block leading-normal">{memo.signatures.Initiator.timestamp}</span>
-                      </div>
-                      <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Initiator.type === 'draw' || memo.signatures.Initiator.type === 'import' ? (
-                          <img src={memo.signatures.Initiator.value} alt="Signature Vector representation value" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span className="font-serif italic text-emerald-400 text-xs">{memo.signatures.Initiator.value}</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {/* Paper Watermark Seal decoration */}
+              <div className="absolute right-8 top-1/4 opacity-[0.03] text-[90px] font-black select-none pointer-events-none transform -rotate-12">
+                APPROVED
               </div>
 
-              {/* Step 2: Line Manager */}
-              <div className="flex gap-4 relative">
-                <div className={`z-10 h-9 w-9 flex items-center justify-center rounded-full shrink-0 font-bold text-sm ${
-                  memo.signatures.LineManager ? 'bg-emerald-950/80 border border-emerald-500 text-emerald-400' : 'bg-slate-950 border border-slate-800 text-slate-600'
-                }`}>
-                  {memo.signatures.LineManager ? '✓' : '2'}
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex-1 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="text-slate-200 text-sm">Line Manager Review</strong>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {memo.signatures.LineManager ? 'Completed' : 'Awaiting Endorsement'}
-                    </span>
-                  </div>
-                  <p className="text-slate-400">Certifies departmental budget checks and core strategic justification alignment.</p>
-                  
-                  {memo.signatures.LineManager ? (
-                    <div className="mt-3 bg-slate-900 p-2.5 rounded border border-slate-800 flex items-center justify-between gap-2 max-w-sm">
-                      <div className="flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{memo.signatures.LineManager.name}</span>
-                        <span className="text-[9px] text-slate-500 block leading-none">{memo.signatures.LineManager.position}</span>
-                        <span className="text-[8px] text-slate-600 block">{memo.signatures.LineManager.timestamp}</span>
-                      </div>
-                      <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1 font-serif text-sky-400 italic">
-                        {memo.signatures.LineManager.type === 'draw' || memo.signatures.LineManager.type === 'import' ? (
-                          <img src={memo.signatures.LineManager.value} alt="Line Manager signature image representation" className="h-full object-contain filter invert-0" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span>{memo.signatures.LineManager.value}</span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-[10px] text-amber-500/85 mt-2.5 block italic font-semibold">
-                      {memo.status === 'PendingLineManager' ? "● Session active under Babatunde Lawson check" : "Awaiting previous level authorization."}
-                    </span>
-                  )}
-                </div>
+              {/* Institutional Header */}
+              <div className="text-center font-bold pb-4 border-b border-slate-350">
+                <span className="text-[10px] tracking-[0.25em] text-slate-500 uppercase block font-mono">VETIVA CAPITAL MANAGEMENT LIMITED</span>
+                <span className="text-2xl font-serif tracking-widest text-[#0F172A] block mt-1.5">INTERNAL MEMORANDUM</span>
               </div>
 
-              {/* Step 3: Internal Control Auditor */}
-              <div className="flex gap-4 relative">
-                <div className={`z-10 h-9 w-9 flex items-center justify-center rounded-full shrink-0 font-bold text-sm ${
-                  memo.signatures.Auditor ? 'bg-emerald-950/80 border border-emerald-500 text-emerald-400' : 'bg-slate-950 border border-slate-800 text-slate-600'
-                }`}>
-                  {memo.signatures.Auditor ? '✓' : '3'}
+              {/* Memo Formal Parameters Grid */}
+              <table className="w-full text-xs mt-6 border-collapse">
+                <tbody>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-bold text-slate-500 uppercase w-24">TO:</td>
+                    <td className="py-2.5 text-slate-800 font-semibold">Babatunde Lawson (Head of Admin) • Chioma Nze (Internal Control Auditor) • Dr. Olaoluwa Vetiva (Managing Director/CEO) • Aisha Suleiman (Finance Controller)</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-bold text-slate-500 uppercase">FROM:</td>
+                    <td className="py-2.5 text-slate-900 font-black">{memo.initiator.name} ({memo.department})</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-bold text-slate-500 uppercase">DATE:</td>
+                    <td className="py-2.5 text-slate-800 font-mono font-medium">{new Date(memo.createdAt).toLocaleDateString("en-NG", { dateStyle: 'long' })}</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-bold text-slate-500 uppercase">REF ID:</td>
+                    <td className="py-2.5 text-blue-650 font-mono font-bold">{memo.id}</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-bold text-slate-500 uppercase">SUM AMOUNT:</td>
+                    <td className="py-2.5 text-slate-900 text-sm font-bold font-mono">₦{memo.amount.toLocaleString()} (Naira Only)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 pr-4 font-bold text-slate-500 uppercase">SUBJECT:</td>
+                    <td className="py-3 text-[#0F172A] font-black tracking-wide text-xs uppercase">{memo.title}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Formal border thin divider */}
+              <hr className="border-t-2 border-double border-slate-350 my-4" />
+
+              {/* Memorandum Standard Body */}
+              <div className="space-y-4 pt-2 text-xs md:text-sm leading-relaxed text-slate-800 font-serif">
+                <p>
+                  This memorandum formally requests and records approval for the utilization of institutional capital. These specific resources shall support the operations outlined under direct compliance guidelines:
+                </p>
+
+                {/* Purpose Paragraph Box */}
+                <div className="bg-white/80 p-4 rounded-xl border border-slate-250 font-sans text-xs italic text-slate-700 leading-relaxed my-3 shadow-3xs">
+                  <strong className="block text-[9px] uppercase tracking-wider text-slate-500 not-italic font-mono font-bold mb-1">Declared Scope &amp; Purpose Justification:</strong>
+                  "{memo.purpose}"
                 </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex-1 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="text-slate-200 text-sm">Internal Control Compliance Review</strong>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {memo.signatures.Auditor ? 'Compliance Passed' : 'Awaiting Audit verification'}
-                    </span>
-                  </div>
-                  <p className="text-slate-400">Verifies organizational policy compliance, voucher invoice details alignment, and funds audit tracking integrity.</p>
-                  
-                  {memo.signatures.Auditor ? (
-                    <div className="mt-3 bg-slate-900 p-2.5 rounded border border-slate-800 flex items-center justify-between gap-2 max-w-sm">
-                      <div className="flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{memo.signatures.Auditor.name}</span>
-                        <span className="text-[9px] text-slate-500 block leading-none">{memo.signatures.Auditor.position}</span>
-                        <span className="text-[8px] text-slate-600 block">{memo.signatures.Auditor.timestamp}</span>
-                      </div>
-                      <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Auditor.type === 'draw' || memo.signatures.Auditor.type === 'import' ? (
-                          <img src={memo.signatures.Auditor.value} alt="Auditor digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span className="font-serif italic text-purple-400 text-xs">{memo.signatures.Auditor.value}</span>
-                        )}
-                      </div>
+
+                {/* Sub specifications for Specific types */}
+                {memo.type === 'VendorPayment' && memo.vendorName && (
+                  <p className="font-sans text-xs bg-indigo-50 border border-indigo-150 p-3.5 rounded-xl text-slate-700 leading-relaxed">
+                    🛡️ This voucher represents a <strong>Vendor Payment track transaction</strong>. Settlements shall be processed directly to <strong>{memo.vendorName}</strong> (Account Number: <strong>{memo.accountNumber}</strong> at Bank: <strong>{memo.bankName}</strong>).
+                  </p>
+                )}
+
+                {memo.type === 'Retirement' && memo.retirementExpenses && (
+                  <div className="bg-slate-100 font-sans p-4 rounded-lg text-xs space-y-2 border border-slate-200">
+                    <strong className="block text-slate-800 uppercase tracking-wider text-[9px]">Retirement Expense breakdown &amp; balances:</strong>
+                    <div className="space-y-1">
+                      {memo.retirementExpenses.map((exp, rIdx) => (
+                        <div key={rIdx} className="flex justify-between border-b border-slate-200 pb-1">
+                          <span>{exp.item} ({exp.description})</span>
+                          <span className="font-mono font-bold">₦{exp.amount.toLocaleString()}</span>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <span className="text-[10px] text-amber-500/85 mt-2.5 block italic font-semibold">
-                      {memo.status === 'PendingAuditor' ? "● Session active under Chioma Nze compliance query audits" : "Awaiting structural clearance level."}
-                    </span>
-                  )}
-                </div>
+                    {memo.balanceReturned !== undefined && (
+                      <div className="flex justify-between font-bold text-emerald-700 pt-1 text-right">
+                        <span>Balance Returned to Custodian:</span>
+                        <span>₦{memo.balanceReturned.toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Step 4: Executive CEO Approval */}
-              <div className="flex gap-4 relative">
-                <div className={`z-10 h-9 w-9 flex items-center justify-center rounded-full shrink-0 font-bold text-sm ${
-                  memo.signatures.Executive ? 'bg-emerald-950/80 border border-emerald-500 text-emerald-400' : 'bg-slate-950 border border-slate-800 text-slate-600'
-                }`}>
-                  {memo.signatures.Executive ? '✓' : '4'}
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex-1 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="text-slate-200 text-sm">Executive CEO Management Approval</strong>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {memo.signatures.Executive ? 'Executive Approval cleared' : 'Awaiting CEO Sign'}
+              {/* SIGNATURE STAMP GRID - HIGH INSTITUTIONAL VERITY */}
+              <div className="border-t border-slate-350 mt-10 pt-6">
+                <span className="text-[9px] font-mono font-bold tracking-[0.2em] text-slate-500 block uppercase mb-5 text-center">
+                  SECURE DIGITAL LEDGER OF PORTAL SIGNATURES
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  
+                  {/* Initiator Stamp */}
+                  <div className="border border-slate-200 bg-white/55 p-3.5 rounded-xl text-center space-y-2 flex flex-col justify-between shadow-3xs">
+                    <div>
+                      <span className="text-[8px] font-mono font-bold text-slate-500 uppercase block tracking-widest leading-none">Voucher Originator</span>
+                      <strong className="text-[11px] text-slate-900 block mt-1.5">{memo.initiator.name}</strong>
+                      <span className="text-[9px] text-slate-400 block">Initiating Officer</span>
+                    </div>
+                    <div className="h-14 bg-slate-100/50 rounded-lg flex items-center justify-center p-1 border border-slate-200 italic font-serif text-slate-400 text-xs text-center">
+                      {memo.signatures.Initiator ? (
+                        memo.signatures.Initiator.type === 'draw' || memo.signatures.Initiator.type === 'import' ? (
+                          <img src={memo.signatures.Initiator.value} alt="Initiator Signature vector visual representation" className="h-full object-contain filter brightness-90 mix-blend-multiply" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-emerald-700 text-sm font-semibold">{memo.signatures.Initiator.value}</span>
+                        )
+                      ) : (
+                        <span className="text-[10px] text-slate-400">Awaiting submission</span>
+                      )}
+                    </div>
+                    <span className="text-[8px] font-mono text-emerald-700 font-bold block bg-emerald-50 rounded py-0.5 border border-emerald-100 uppercase">
+                      ✓ SECURED &amp; ORIGIN VERIFIED
                     </span>
                   </div>
-                  <p className="text-slate-400">Performs final utilization authorization before finance disbursements.</p>
-                  
-                  {memo.signatures.Executive ? (
-                    <div className="mt-3 bg-slate-900 p-2.5 rounded border border-slate-800 flex items-center justify-between gap-2 max-w-sm">
-                      <div className="flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{memo.signatures.Executive.name}</span>
-                        <span className="text-[9px] text-slate-500 block leading-none">{memo.signatures.Executive.position}</span>
-                        <span className="text-[8px] text-slate-600 block">{memo.signatures.Executive.timestamp}</span>
-                      </div>
-                      <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Executive.type === 'draw' || memo.signatures.Executive.type === 'import' ? (
-                          <img src={memo.signatures.Executive.value} alt="Executive CEO digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span className="font-serif italic text-amber-400 text-xs font-semibold">{memo.signatures.Executive.value}</span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-[10px] text-amber-500/85 mt-2.5 block italic font-semibold">
-                      {memo.status === 'PendingExecutive' ? "● Session active under Dr. Olaoluwa Vetiva checkout" : "Awaiting compliance clearance."}
-                    </span>
-                  )}
-                </div>
-              </div>
 
-              {/* Step 5: Finance Settlement */}
-              <div className="flex gap-4 relative">
-                <div className={`z-10 h-9 w-9 flex items-center justify-center rounded-full shrink-0 font-bold text-sm ${
-                  memo.signatures.Finance ? 'bg-emerald-950/80 border border-emerald-500 text-emerald-400' : 'bg-slate-950 border border-slate-800 text-slate-600'
-                }`}>
-                  {memo.signatures.Finance ? '✓' : '5'}
-                </div>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex-1 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="text-slate-200 text-sm">Finance Settlement &amp; Closing</strong>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {memo.signatures.Finance ? 'Completed Paid/Released' : 'Awaiting Payment'}
-                    </span>
-                  </div>
-                  <p className="text-slate-400">Generates PV voucher reference vouchers, archives transfer slips, and handles custodians.</p>
-                  
-                  {memo.signatures.Finance ? (
-                    <div className="mt-3 bg-slate-900 p-2.5 rounded border border-slate-800 flex items-center justify-between gap-2 max-w-sm">
-                      <div className="flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{memo.signatures.Finance.name}</span>
-                        <span className="text-[9px] text-slate-500 block leading-none">{memo.signatures.Finance.position}</span>
-                        <span className="text-[8px] text-slate-600 block">{memo.signatures.Finance.timestamp}</span>
-                      </div>
-                      <div className="h-10 w-28 shrink-0 bg-slate-950 border border-slate-900 rounded flex items-center justify-center p-1">
-                        {memo.signatures.Finance.type === 'draw' || memo.signatures.Finance.type === 'import' ? (
-                          <img src={memo.signatures.Finance.value} alt="Finance digital signature reference" className="h-full object-contain filter brightness-110" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span className="font-serif italic text-rose-400 text-xs font-bold">{memo.signatures.Finance.value}</span>
-                        )}
-                      </div>
+                  {/* Head of Admin Endorsement */}
+                  <div className="border border-slate-200 bg-white/55 p-3.5 rounded-xl text-center space-y-2 flex flex-col justify-between shadow-3xs">
+                    <div>
+                      <span className="text-[8px] font-mono font-bold text-slate-500 uppercase block tracking-widest leading-none">Head of Admin Portal</span>
+                      <strong className="text-[11px] text-slate-900 block mt-1.5">Babatunde Lawson</strong>
+                      <span className="text-[9px] text-slate-400 block">Budget Line Controller</span>
                     </div>
-                  ) : (
-                    <span className="text-[10px] text-amber-500/85 mt-2.5 block italic font-semibold">
-                      {memo.status === 'PendingFinance' ? "● Session active under Aisha Suleiman settlement ledger" : "Awaiting executive disbursement clearance."}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Optional Retirement Steps progression for Cash Advances */}
-              {memo.type === 'CashAdvance' && (memo.status === 'Paid' || memo.status === 'RetirementSubmitted' || memo.status === 'RetirementCompleted') && (
-                <div className="border-t border-slate-850 pt-5 mt-5">
-                  <span className="text-[10px] font-bold text-indigo-400 block uppercase mb-4 tracking-widest">
-                    Asset Retirement / Reconciliation Progression Logs
-                  </span>
-                  
-                  <div className="flex gap-4 relative">
-                    <div className={`z-10 h-8 w-8 flex items-center justify-center rounded-full shrink-0 font-mono text-xs ${
-                      memo.status === 'RetirementCompleted' ? 'bg-emerald-950 border border-emerald-500 text-emerald-400' : memo.status === 'RetirementSubmitted' ? 'bg-indigo-950 border border-indigo-500 text-indigo-400' : 'bg-slate-950 border border-slate-800 text-slate-700'
+                    <div className="h-14 bg-slate-100/50 rounded-lg flex items-center justify-center p-1 border border-slate-200 italic font-serif text-slate-400 text-xs text-center">
+                      {memo.signatures.LineManager ? (
+                        memo.signatures.LineManager.type === 'draw' || memo.signatures.LineManager.type === 'import' ? (
+                          <img src={memo.signatures.LineManager.value} alt="Head of Admin signature representative image value" className="h-full object-contain filter brightness-90 mix-blend-multiply" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-blue-700 text-sm font-semibold">{memo.signatures.LineManager.value}</span>
+                        )
+                      ) : (
+                        <span className="text-[9px] text-amber-600 font-bold animate-pulse">Pending Portal Sign-In</span>
+                      )}
+                    </div>
+                    <span className={`text-[8px] font-mono font-bold block rounded py-0.5 border uppercase ${
+                      memo.signatures.LineManager ? 'bg-blue-50 text-blue-800 border-blue-105' : 'bg-slate-50 text-slate-400 border-slate-200'
                     }`}>
-                      R
-                    </div>
-                    <div className="bg-slate-950 p-3 rounded-lg border border-slate-850 flex-1 text-xs">
-                      <strong className="text-slate-200 block">Retirement status: {memo.status === 'RetirementCompleted' ? 'Retirement Completed' : memo.status === 'RetirementSubmitted' ? 'Retirement Submitted' : 'Awaiting Retirement by Initiator'}</strong>
-                      <p className="text-slate-500 text-[11px] mt-1 leading-normal">
-                        After using cash advance resources, the initiator submits receipt lines, invoices, and returns cash balance to complete the transaction loop.
-                      </p>
-                    </div>
+                      {memo.signatures.LineManager ? `✓ ENDORSED: ${new Date(memo.signatures.LineManager.timestamp).toLocaleDateString()}` : "AWAITING ENDORSEMENT"}
+                    </span>
                   </div>
+
+                  {/* Compliance Auditor Review */}
+                  <div className="border border-slate-200 bg-white/55 p-3.5 rounded-xl text-center space-y-2 flex flex-col justify-between shadow-3xs">
+                    <div>
+                      <span className="text-[8px] font-mono font-bold text-slate-500 uppercase block tracking-widest leading-none">Internal Compliance Auditor</span>
+                      <strong className="text-[11px] text-slate-900 block mt-1.5">Chioma Nze</strong>
+                      <span className="text-[9px] text-slate-400 block">Senior compliance Officer</span>
+                    </div>
+                    <div className="h-14 bg-slate-100/50 rounded-lg flex items-center justify-center p-1 border border-slate-200 italic font-serif text-slate-400 text-xs text-center">
+                      {memo.signatures.Auditor ? (
+                        memo.signatures.Auditor.type === 'draw' || memo.signatures.Auditor.type === 'import' ? (
+                          <img src={memo.signatures.Auditor.value} alt="Auditor digital stamp representation" className="h-full object-contain filter brightness-90 mix-blend-multiply" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-purple-700 text-sm font-semibold">{memo.signatures.Auditor.value}</span>
+                        )
+                      ) : (
+                        <span className="text-[9px] text-slate-400">Awaiting internal compliance</span>
+                      )}
+                    </div>
+                    <span className={`text-[8px] font-mono font-bold block rounded py-0.5 border uppercase ${
+                      memo.signatures.Auditor ? 'bg-purple-50 text-purple-800 border-purple-105' : 'bg-slate-50 text-slate-400 border-slate-200'
+                    }`}>
+                      {memo.signatures.Auditor ? `✓ AUDIT PASSED: ${new Date(memo.signatures.Auditor.timestamp).toLocaleDateString()}` : "AWAITING COMPLIANCE AUDIT"}
+                    </span>
+                  </div>
+
+                  {/* Managing Director CEO check */}
+                  <div className="border border-slate-200 bg-white/55 p-3.5 rounded-xl text-center space-y-2 flex flex-col justify-between shadow-3xs">
+                    <div>
+                      <span className="text-[8px] font-mono font-bold text-slate-500 uppercase block tracking-widest leading-none">Sanctioning Executive Authority</span>
+                      <strong className="text-[11px] text-slate-900 block mt-1.5">Dr. Olaoluwa Vetiva</strong>
+                      <span className="text-[9px] text-slate-400 block">Managing Director / CEO</span>
+                    </div>
+                    <div className="h-14 bg-slate-100/50 rounded-lg flex items-center justify-center p-1 border border-slate-200 italic font-serif text-slate-400 text-xs text-center">
+                      {memo.signatures.Executive ? (
+                        memo.signatures.Executive.type === 'draw' || memo.signatures.Executive.type === 'import' ? (
+                          <img src={memo.signatures.Executive.value} alt="Executive CEO stamp representation" className="h-full object-contain filter brightness-90 mix-blend-multiply" referrerPolicy="no-referrer" />
+                        ) : (
+                          <span className="font-serif italic text-amber-700 text-sm font-semibold">{memo.signatures.Executive.value}</span>
+                        )
+                      ) : (
+                        <span className="text-[9px] text-slate-400">Awaiting CEO Sanction</span>
+                      )}
+                    </div>
+                    <span className={`text-[8px] font-mono font-bold block rounded py-0.5 border uppercase ${
+                      memo.signatures.Executive ? 'bg-amber-50 text-amber-800 border-amber-105' : 'bg-slate-50 text-slate-400 border-slate-200'
+                    }`}>
+                      {memo.signatures.Executive ? `✓ CEO APPROVED: ${new Date(memo.signatures.Executive.timestamp).toLocaleDateString()}` : "AWAITING CEO BOARD SIGN"}
+                    </span>
+                  </div>
+
                 </div>
-              )}
+
+                {/* Secure digital ledger tracking metadata footprint */}
+                <div className="text-center mt-6 text-[9.5px] text-slate-400 font-mono space-y-0.5 border-t border-slate-200 pt-4 select-none">
+                  <div>VETIVA ENTERPRISE LEDGER SECURED DIGITAL WORKFLOW ID</div>
+                  <div className="text-slate-500">DIGITAL SHA-256 CHECKSUM: {memo.id.replace(/\//g, '')}F6C7A901FDE89472B7020E90C0E773A</div>
+                </div>
+
+              </div>
+
             </div>
           </div>
         )}
@@ -721,6 +725,29 @@ Status: Certified Closed Ledger.
       {/* FOOTER ACTION CONTROLS */}
       <div className="bg-slate-950 p-4 border-t border-slate-800 space-y-3 shrink-0">
         
+        {/* State 0: Quick Auto-Approve Workflow Controller */}
+        {['PendingLineManager', 'PendingAuditor', 'PendingExecutive', 'RetirementSubmitted', 'PendingRetirementLineManager', 'PendingRetirementAuditor'].includes(memo.status) && (
+          <div className="bg-[#030712]/95 border border-slate-800 p-3 rounded-xl space-y-1.5 select-none shadow">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-400 uppercase tracking-wider leading-none">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+              </span>
+              <span>Admin Direct Clearance Controller</span>
+            </div>
+            <p className="text-[9.5px] text-slate-400 leading-normal">
+              Bypass sequential reviews. Automatically certifies <strong>Head of Admin</strong>, <strong>Auditor</strong>, and <strong>MD/CEO</strong> compliance sign-offs and directs straight to <strong>Finance</strong>.
+            </p>
+            <button
+              type="button"
+              onClick={() => onAction('AutomateApprovals', 'Automated direct endorsement & approval clearance certified by member of Admin department.')}
+              className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 shadow"
+            >
+              ⚡ Automate Approvals & Send to Finance
+            </button>
+          </div>
+        )}
+        
         {/* State 1: Current role can act and has not started the review panel */}
         {canRoleAct() && !showApprovalSection && (
           <div className="flex items-center justify-between text-xs bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
@@ -828,7 +855,7 @@ Status: Certified Closed Ledger.
                     'Aisha Suleiman'
                   }
                   defaultPosition={
-                    currentRole === 'LineManager' ? 'Head of Unit' : 
+                    currentRole === 'LineManager' ? 'Head of Admin' : 
                     currentRole === 'Auditor' ? 'Senior Compliance Officer' : 
                     currentRole === 'Executive' ? 'Managing Director / CEO' : 
                     'Financial Controller'
